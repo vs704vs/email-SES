@@ -505,3 +505,151 @@ const populateTableData = (fileNames: string[], filePaths: string[]) => {
   setTableData(updatedTableData);
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+To ensure that the file is downloaded by the browser instead of displaying its content in the response, you need to update the HTTP headers in your Spring Boot controller and adjust your frontend request. Here’s how you can achieve it:
+
+
+---
+
+Updated Spring Boot Controller
+
+Update the downloadFromBucket method to include headers that prompt the browser to download the file:
+
+@GetMapping("/downloadFile")
+public ResponseEntity<Resource> downloadFromBucket(
+        @RequestParam(name = "fileName") String fileName,
+        @RequestParam(name = "processKey") String processKey) {
+
+    Resource fileResource = objectStorageService.downloadObjectFromBucket(fileName, processKey);
+
+    return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+            .header(HttpHeaders.CONTENT_TYPE, "application/octet-stream") // Ensures browser handles it as a file
+            .body(fileResource);
+}
+
+Key Changes in Controller
+
+1. Content-Disposition Header:
+
+attachment; filename="<fileName>" ensures the browser prompts a download dialog.
+
+
+
+2. Content-Type Header:
+
+Setting it to application/octet-stream informs the browser that the response is binary data suitable for download.
+
+
+
+
+
+---
+
+Frontend Code Update
+
+Ensure you are triggering a download in the frontend. Use fetch with the blob() method to handle the response and create a downloadable link:
+
+const downloadFile = (fileName: string) => {
+  fetch(`cost/lastloadedfiles/downloadFile?fileName=${encodeURIComponent(fileName)}&processKey=ALM`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.blob();
+    })
+    .then((blob) => {
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName; // Suggested filename for download
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url); // Cleanup URL object
+    })
+    .catch((err) => console.error('Error downloading file:', err));
+};
+
+
+---
+
+Key Changes in Frontend
+
+1. fetch with blob():
+
+Converts the response into a blob (binary large object) suitable for download.
+
+
+
+2. Dynamic Download Link:
+
+Creates an <a> tag programmatically, triggers a click to download, and then removes it.
+
+
+
+
+
+---
+
+Expected Behavior
+
+1. Backend:
+
+The Content-Disposition header ensures the file is marked for download with the correct filename.
+
+The Content-Type header signals to the browser that the content is binary data.
+
+
+
+2. Frontend:
+
+Downloads the file and saves it locally with the specified filename.
+
+
+
+
+
+---
+
+Let me know if you face any issues!
+
+
