@@ -449,3 +449,59 @@ const generateRegex = (name: string): RegExp => {
   return new RegExp(`^.*${escapedName}$`, 'i'); // Match the full path ending with the name
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const populateTableData = (fileNames: string[], filePaths: string[]) => {
+  const dateTimeRegex = /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+)/;
+  const updatedTableData: FileInfo[] = [];
+
+  uploadFileNames.forEach((uploadName) => {
+    const regex = generateRegex(uploadName);
+    const matchIndex = fileNames
+      .slice() // Copy array
+      .reverse() // Reverse to get the last occurrence
+      .findIndex((fileName) => regex.test(fileName));
+    
+    if (matchIndex !== -1) {
+      const match = fileNames[fileNames.length - 1 - matchIndex]; // Adjust index for reversed array
+      const dateMatch = match.match(dateTimeRegex);
+      const uploadDate = dateMatch ? dateMatch[1] : '';
+      const filePath = filePaths[fileNames.length - 1 - matchIndex]; // Use the same index for filePath
+
+      updatedTableData.push({
+        displayName: uploadName,
+        fileName: match,
+        filePath: filePath,
+        isUploaded: true,
+        uploadDate: uploadDate,
+      });
+    } else {
+      updatedTableData.push({
+        displayName: uploadName,
+        fileName: '',
+        filePath: '',
+        isUploaded: false,
+        uploadDate: '',
+      });
+    }
+  });
+
+  setTableData(updatedTableData);
+};
+
