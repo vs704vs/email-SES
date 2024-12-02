@@ -374,3 +374,50 @@ Adjust styles or table rendering as needed for your specific UI framework or des
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function formatDate(inputDate: string): string {
+  const date = new Date(inputDate);
+
+  // Extract individual components
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  // Format the date as DD/MM/YYYY HH:mm:ss
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
+// Example usage
+const input = "2024-05-20T14:29:47.893092700";
+const formattedDate = formatDate(input);
+console.log(formattedDate); // Output: "20/05/2024 14:29:47"
+
+
+
