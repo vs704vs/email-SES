@@ -165,3 +165,212 @@ console.log(regex.test(text)); // true
 
 Let me know if you'd like help testing or refining this!
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Here’s how you can implement the required functionality:
+
+Steps:
+
+1. Iterate through the uploadFileNames array.
+
+
+2. Generate a regex for each file name using the generateRegex function.
+
+
+3. Match the generated regex against the fileNames array.
+
+
+4. If a match is found:
+
+Extract the date-time using the dateTimeRegex.
+
+Populate the tableData state with the required information.
+
+
+
+
+Here’s the updated code:
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+interface FileInfo {
+  displayName: string;
+  fileName: string;
+  isUploaded: boolean;
+  uploadDate: string;
+}
+
+const LastLoadedFiles = () => {
+  const [costCRValue, setCostCRMValue] = useState("");
+  const [tableData, setTableData] = useState<FileInfo[]>([]);
+
+  const uploadFileNames: string[] = [
+    "Drivers",
+    "Gizeh",
+    "Inter RC Application",
+    "Inter RC Editique",
+    "Inter RC Management",
+    "Inter RC Project",
+    "Intra RC",
+    "Keys",
+    "NBI Activity Coefficient",
+    "NBI-Entity",
+    "NBI-Products",
+    "NBI-Segment",
+    "Rul-Alloc",
+  ];
+
+  const generateRegex = (name: string): RegExp => {
+    const escapedName = name
+      .replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
+      .replace(/\\/g, "[-_\\s]*");
+    return new RegExp(`^${escapedName}`, "i");
+  };
+
+  const fetchCostCRMValue = async () => {
+    try {
+      const res = await axios.get("cost/rollover/getCRMValue");
+      setCostCRMValue(res.data.value);
+    } catch (err) {
+      console.error("Error occurred when fetching CRM value", err);
+    }
+  };
+
+  const fetchTableData = async () => {
+    try {
+      const res = await axios.get(
+        "cost/lastloadedfiles/listFilesInFolder?FolderPath=ALM/"
+      );
+      const filePaths: string[] = res.data.slice(1);
+
+      const fileNames: string[] = filePaths.map((path) =>
+        path.substring(path.lastIndexOf("/") + 1)
+      );
+
+      const dateTimeRegex = /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+)/;
+
+      const updatedTableData: FileInfo[] = [];
+
+      uploadFileNames.forEach((uploadName) => {
+        const regex = generateRegex(uploadName);
+        const match = fileNames.find((fileName) => regex.test(fileName));
+
+        if (match) {
+          const dateMatch = match.match(dateTimeRegex);
+          const uploadDate = dateMatch ? dateMatch[1] : "";
+
+          updatedTableData.push({
+            displayName: uploadName,
+            fileName: match,
+            isUploaded: true,
+            uploadDate: uploadDate,
+          });
+        } else {
+          updatedTableData.push({
+            displayName: uploadName,
+            fileName: "",
+            isUploaded: false,
+            uploadDate: "",
+          });
+        }
+      });
+
+      setTableData(updatedTableData);
+    } catch (err) {
+      console.error("Error occurred when fetching table data", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCostCRMValue();
+    fetchTableData();
+  }, []);
+
+  return (
+    <div>
+      <h1>Last Loaded Files</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Display Name</th>
+            <th>File Name</th>
+            <th>Is Uploaded</th>
+            <th>Upload Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tableData.map((row, index) => (
+            <tr key={index}>
+              <td>{row.displayName}</td>
+              <td>{row.fileName}</td>
+              <td>{row.isUploaded ? "Yes" : "No"}</td>
+              <td>{row.uploadDate}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default LastLoadedFiles;
+
+Key Features:
+
+1. Regex Generation: The generateRegex function ensures dynamic creation of robust regex patterns.
+
+
+2. Date Extraction: The dateTimeRegex accurately extracts date-time values.
+
+
+3. State Management: The tableData state holds the processed data.
+
+
+4. UI Rendering: The table displays the final data, including whether files were uploaded.
+
+
+
+Notes:
+
+Ensure the API endpoints (cost/rollover/getCRMValue and cost/lastloadedfiles/listFilesInFolder) are accessible and return the expected data format.
+
+Adjust styles or table rendering as needed for your specific UI framework or design.
+
+
+
+
