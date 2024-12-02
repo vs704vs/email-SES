@@ -421,3 +421,31 @@ console.log(formattedDate); // Output: "20/05/2024 14:29:47"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const generateRegex = (name: string): RegExp => {
+  // Escape special characters in the file name or path
+  const escapedName = name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  return new RegExp(`^.*${escapedName}$`, 'i'); // Match the full path ending with the name
+};
+
