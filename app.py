@@ -44,13 +44,3 @@ with smtplib.SMTP(smtp_server, smtp_port) as server:
     server.send_message(msg)
 
 print("Email sent successfully")
-
-
-
-
-
-
-
-
-
-https://www.urlshort.dev/
